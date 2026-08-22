@@ -1,0 +1,29 @@
+
+# SkillRL 个人配置（含路径/账号，不上传）
+config.sh
+
+# 运行时生成的文件
+outputs/
+hope_files/
+# memory_data 进化结果/生成数据不追踪，但初始 skill bank 需要追踪
+memory_data/**
+!memory_data/
+!memory_data/alfworld/
+!memory_data/alfworld/claude_style_skills.json
+!memory_data/webshop/
+!memory_data/webshop/claude_style_skills.json
+utils/claude-bin
+__pycache__/
+*.pyc
+*.pyo
+
+# Local development artifacts
+.DS_Store
+.idea/
+.vscode/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+*.egg-info/

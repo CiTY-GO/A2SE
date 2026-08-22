@@ -1,0 +1,384 @@
+{
+  "general_skills": [
+    {
+      "skill_id": "gen_001",
+      "title": "Constraint-Complete Search Query",
+      "when_to_apply": "Before issuing any search query, or when refining a query that returned irrelevant results.",
+      "meta": {
+        "D-PLAN": "Before typing the query, enumerate all user constraints: product type, key functional attributes, hard limits (price cap, size, color). Build the query by including the product type plus the 2-3 most restrictive constraints. Omit secondary descriptors that may over-constrain. If the first query returns few or irrelevant results, broaden by removing one attribute or substituting a synonym, then re-search rather than clicking unsuitable items.",
+        "D-GUARD": "Never omit a hard constraint (price, size, type) from the query. Never repeat an identical query expecting different results. Never spend more than two attempts on the same query string — change at least one term before retrying."
+      },
+      "synthesized_text": "Build every search query by first listing all user constraints, then composing a query with the product type plus the 2-3 most restrictive hard constraints. If results are irrelevant, broaden by removing one term or substituting a synonym — never repeat an identical query.",
+      "utility": 1.0,
+      "retrieval_count": 0
+    },
+    {
+      "skill_id": "gen_002",
+      "title": "Result-Page Scan Before Clicking",
+      "when_to_apply": "On any search results page when deciding which product link to open.",
+      "meta": {
+        "D-PLAN": "On the results page, read product titles, category labels, and displayed prices before opening any item. Prioritize results whose titles explicitly mention the required type and key attributes. Open the highest-confidence match first.",
+        "D-GUARD": "Never click the first result blindly. Never open a product whose title clearly violates a hard constraint (wrong category, clearly over-budget). Never re-open a product already confirmed unsuitable."
+      },
+      "synthesized_text": "Before clicking any result, scan titles, categories, and prices to identify the highest-confidence match. Open results in confidence order. Never click blindly or re-open a product already confirmed unsuitable.",
+      "utility": 1.0,
+      "retrieval_count": 0
+    },
+    {
+      "skill_id": "gen_003",
+      "title": "Early Hard-Constraint Gatekeeping",
+      "when_to_apply": "Within the first observation on every product detail page.",
+      "meta": {
+        "D-EXEC": "Immediately upon opening a product page, check in order: (1) category/type matches the request, (2) displayed price is within budget, (3) primary required attribute is present in title or description. If any check fails, leave the page immediately.",
+        "D-GUARD": "Never invest time selecting variants or reading descriptions on a product that has already failed a hard-constraint check. Sunk-cost thinking on clearly unsuitable products is the main source of wasted steps."
+      },
+      "synthesized_text": "Upon opening any product page, immediately verify: correct category/type, price within budget, primary required attribute present. If any check fails, leave immediately. Never configure variants on a product that has already failed a hard constraint.",
+      "utility": 1.0,
+      "retrieval_count": 0
+    },
+    {
+      "skill_id": "gen_004",
+      "title": "Variant Selection Before Purchase",
+      "when_to_apply": "After confirming product type matches and before any purchase action.",
+      "meta": {
+        "D-EXEC": "On the product page, explicitly select every required variant option (size, color, capacity, pack count) in the order they appear. After each selection, verify that the page updates and re-check the price — it may change per variant.",
+        "D-TRACK": "Track which variant dimensions have been set. Do not proceed to 'Buy Now' until all required dimensions are explicitly selected and confirmed.",
+        "D-GUARD": "Never click 'Buy Now' while any required variant remains at its default or unselected state. Never assume the default variant satisfies the user's specified option."
+      },
+      "synthesized_text": "Before purchasing, explicitly select every required variant (size, color, capacity). Verify the page updates correctly and re-check the price after each selection. Never click 'Buy Now' while any required variant is unset.",
+      "utility": 1.0,
+      "retrieval_count": 0
+    },
+    {
+      "skill_id": "gen_005",
+      "title": "Post-Variant Price Verification",
+      "when_to_apply": "After selecting all variants and before initiating checkout.",
+      "meta": {
+        "D-TRACK": "After setting all required variants, read the final displayed price for the exact variant combination. Compare it against the user's budget. If the price now exceeds budget, treat this product as unsuitable and return to search.",
+        "D-GUARD": "Never rely on the initial price displayed before variant selection — it may be the lowest-tier price in a range. Always re-read price after the final variant is set."
+      },
+      "synthesized_text": "After selecting all variants, re-read the displayed price for that exact combination before clicking 'Buy Now'. The initial price may be a range minimum. If the final price exceeds budget, return to search.",
+      "utility": 1.0,
+      "retrieval_count": 0
+    },
+    {
+      "skill_id": "gen_006",
+      "title": "Hidden-Attribute Description Check",
+      "when_to_apply": "When a required attribute is not visible in the title, images, or variant list.",
+      "meta": {
+        "D-EXEC": "Open the Description, Features, or Specifications section and read the bullet points to verify non-visible constraints (material, wash instructions, slip resistance, compatibility). If the required attribute is not explicitly mentioned, treat it as unconfirmed and skip the product.",
+        "D-GUARD": "Never purchase when a required attribute is unconfirmed. Never assume an attribute is present because it was not mentioned as absent."
+      },
+      "synthesized_text": "When a required attribute is not visible in title or variants, open Description/Features and read the bullet points. If the attribute is not explicitly mentioned, skip the product. Never assume presence from silence.",
+      "utility": 1.0,
+      "retrieval_count": 0
+    },
+    {
+      "skill_id": "gen_007",
+      "title": "Exit Non-Matches Immediately",
+      "when_to_apply": "As soon as any hard constraint is violated, or after two to three failed variant attempts.",
+      "meta": {
+        "D-PLAN": "When a product fails any hard constraint (wrong type, over-budget, required attribute missing), return to search results immediately without further interaction.",
+        "D-GUARD": "Never spend more than two to three variant changes on a product that cannot satisfy all constraints. Never reopen a product already confirmed unsuitable. Sunk-cost persistence is the primary driver of wasted steps."
+      },
+      "synthesized_text": "The moment a product fails any hard constraint, return to search results immediately. After two to three failed variant attempts, abandon and search for another. Persisting on an unsuitable product is the primary driver of wasted steps.",
+      "utility": 1.0,
+      "retrieval_count": 0
+    },
+    {
+      "skill_id": "gen_008",
+      "title": "Decisive Purchase Execution",
+      "when_to_apply": "After all constraints are verified on a specific variant combination.",
+      "meta": {
+        "D-EXEC": "Once every constraint — type, attributes, variant options, and final price — is positively confirmed, click 'Buy Now' immediately without further browsing.",
+        "D-GUARD": "Never continue browsing after a fully-confirmed match. Unnecessary navigation risks losing the confirmed selection and wastes steps."
+      },
+      "synthesized_text": "Once every constraint is verified on the exact variant, execute 'Buy Now' immediately. Do not continue browsing after a fully-confirmed match — unnecessary navigation risks losing the selection.",
+      "utility": 1.0,
+      "retrieval_count": 0
+    }
+  ],
+  "task_specific_skills": {
+    "apparel": [
+      {
+        "skill_id": "app_001",
+        "title": "Garment-Focused Query Construction",
+        "when_to_apply": "Before issuing any search query for apparel.",
+        "meta": {
+          "D-PLAN": "Compose the query as: [gender if specified] + [garment type] + [1-2 must-have attributes: fabric, fit, or sleeve style] + [price cap if tight]. Omit minor decorative details. If the first query is too narrow, remove the least-critical attribute and retry.",
+          "D-GUARD": "Never include more than three attributes in the initial query — over-specified apparel queries reliably return zero results. Use base color families ('pink') rather than niche names ('dusty blush')."
+        },
+        "synthesized_text": "Build apparel queries with gender + garment type + 1-2 must-have attributes. Use base color families. Limit to three attributes — over-specified queries return empty results.",
+        "utility": 1.0,
+        "retrieval_count": 0
+      },
+      {
+        "skill_id": "app_002",
+        "title": "Garment Type and Attribute Validation",
+        "when_to_apply": "Immediately after opening any apparel product page.",
+        "meta": {
+          "D-EXEC": "Verify in order: (1) garment type/category matches exactly ('dress shirt' ≠ 'dress pants'), (2) primary attribute visible in title or description, (3) required size and color options available. Leave immediately on type mismatch.",
+          "D-GUARD": "Never rely on thumbnail images to confirm garment type — the category label is authoritative. Never proceed to variant selection before the garment type is confirmed correct."
+        },
+        "synthesized_text": "Upon opening an apparel page, verify garment type from category label first (not thumbnail), then primary attributes, then size/color availability. Leave immediately on type mismatch.",
+        "utility": 1.0,
+        "retrieval_count": 0
+      },
+      {
+        "skill_id": "app_003",
+        "title": "Size-Color-Price Sequence",
+        "when_to_apply": "On a confirmed apparel product page before purchase.",
+        "meta": {
+          "D-EXEC": "Select options in order: (1) required size, (2) required color/pattern, (3) verify final price after both selections. Apparel prices frequently vary by size.",
+          "D-TRACK": "Track which options are set. Proceed to 'Buy Now' only after size, color, and final price are all confirmed.",
+          "D-GUARD": "Never click 'Buy Now' before size and color are both explicitly selected. Never assume default size or color matches the specification."
+        },
+        "synthesized_text": "On confirmed apparel, select size first, then color/pattern, then re-verify price — apparel prices often change by size. Both size and color must be explicitly set before purchasing.",
+        "utility": 1.0,
+        "retrieval_count": 0
+      }
+    ],
+    "footwear": [
+      {
+        "skill_id": "foo_001",
+        "title": "Footwear Constraint Search",
+        "when_to_apply": "Before any footwear search.",
+        "meta": {
+          "D-PLAN": "Include in the query: footwear type + key functional attribute (slip-resistant, waterproof) + color + price cap. The functional attribute is more important than aesthetic attributes. Use broad functional terms ('rubber sole', 'non-slip') rather than technical jargon.",
+          "D-GUARD": "Never omit the footwear type. Never use technical terms not found in product titles."
+        },
+        "synthesized_text": "Footwear queries must include type + functional attribute + color + price cap. Use broad functional terms that appear in product titles. The functional attribute is the most critical filter after type.",
+        "utility": 1.0,
+        "retrieval_count": 0
+      },
+      {
+        "skill_id": "foo_002",
+        "title": "Functional Feature Verification",
+        "when_to_apply": "After confirming footwear type and before selecting variants.",
+        "meta": {
+          "D-EXEC": "Open the description/specifications section and explicitly locate the required functional attribute (slip-resistant, waterproof, arch support). If not explicitly mentioned, treat the product as non-conforming.",
+          "D-GUARD": "Never purchase footwear based on visual appearance when a functional attribute is required. Never assume the attribute is present because it was not mentioned as absent."
+        },
+        "synthesized_text": "For functional footwear, open the description and explicitly locate the required attribute. If not explicitly stated, skip the product. Visual appearance does not confirm functional attributes.",
+        "utility": 1.0,
+        "retrieval_count": 0
+      },
+      {
+        "skill_id": "foo_003",
+        "title": "Size-System Exact Match",
+        "when_to_apply": "When selecting shoe size on any footwear product page.",
+        "meta": {
+          "D-EXEC": "Match the full size token including any modifiers ('8 Wide', '10 Narrow', '42 EU'). Do not select a size based on a partial numeric match alone.",
+          "D-TRACK": "After selecting size, verify the exact displayed label matches the specification before proceeding.",
+          "D-GUARD": "Never select a size based solely on matching number without checking the system and width modifier. Size system mismatches are a silent purchase error."
+        },
+        "synthesized_text": "Match the full size token including system and width modifier. Verify the displayed label after selection. A partial numeric match is insufficient — size system mismatches are silent errors.",
+        "utility": 1.0,
+        "retrieval_count": 0
+      }
+    ],
+    "home_decor": [
+      {
+        "skill_id": "hom_001",
+        "title": "Multi-Attribute Home Decor Query",
+        "when_to_apply": "Before any home decor search.",
+        "meta": {
+          "D-PLAN": "Include product type plus all hard constraints (color, size, shape, material, price) in the initial query. If results are sparse, remove the least-critical attribute first (typically shape before color).",
+          "D-GUARD": "Never omit product type. Never search with only aesthetic attributes — product type must anchor the query."
+        },
+        "synthesized_text": "Home decor queries must anchor on product type, then add all hard constraints. If sparse, remove least-critical first. Aesthetic-only queries return unmanageably broad results.",
+        "utility": 1.0,
+        "retrieval_count": 0
+      },
+      {
+        "skill_id": "hom_002",
+        "title": "Category and Dimension Confirmation",
+        "when_to_apply": "After opening any home decor product page.",
+        "meta": {
+          "D-EXEC": "Verify: (1) product category matches exactly ('throw pillow' ≠ 'floor pillow', 'area rug' ≠ 'runner rug'), (2) dimensions/size match specification, (3) color/pattern matches. Open Description for material and care if required.",
+          "D-GUARD": "Never purchase a visually similar but categorically different product. Dimension mismatches are easy to miss without explicit checking."
+        },
+        "synthesized_text": "Verify exact category, then dimensions, then color/pattern on home decor pages. Open Description for material and care if required. Dimension mismatches are the most frequent silent error in home decor purchases.",
+        "utility": 1.0,
+        "retrieval_count": 0
+      }
+    ],
+    "electronics": [
+      {
+        "skill_id": "ele_001",
+        "title": "Spec-Anchored Electronics Search",
+        "when_to_apply": "Before any electronics search.",
+        "meta": {
+          "D-PLAN": "Include product type plus every mandatory technical spec (capacity, compatibility, feature set, price cap) using exact terms that appear in product titles ('64GB', 'USB-C', 'noise-cancelling').",
+          "D-GUARD": "Never use vague marketing terms in electronics queries. Never omit the primary differentiating technical spec."
+        },
+        "synthesized_text": "Electronics queries require product type plus precise technical specs using terms that appear in product titles. Vague terms match too broadly; omitting the primary spec misses the target product.",
+        "utility": 1.0,
+        "retrieval_count": 0
+      },
+      {
+        "skill_id": "ele_002",
+        "title": "Spec and Variant Verification",
+        "when_to_apply": "On any electronics product page after confirming category match.",
+        "meta": {
+          "D-EXEC": "Set required variants (capacity, color, pack count) immediately. After each selection, verify the product title and specs update. If the title stays static after a variant click, the product may not truly offer that spec — leave.",
+          "D-TRACK": "Track which specs have been verified. Only proceed to price check after all required specs are confirmed.",
+          "D-GUARD": "Never purchase if variant clicks do not update the displayed title/specs. A static title indicates the variant selection may be non-functional."
+        },
+        "synthesized_text": "Set required variants and verify the title/specs update after each selection. A static title after variant click indicates a non-functional selection — leave and find another product. Verify all specs before price check.",
+        "utility": 1.0,
+        "retrieval_count": 0
+      }
+    ],
+    "accessories": [
+      {
+        "skill_id": "acc_001",
+        "title": "Function-Type Verification",
+        "when_to_apply": "After opening any accessories product page.",
+        "meta": {
+          "D-EXEC": "Read the product title and description to verify the accessory's intended use matches the request ('eye-shadow case' ≠ 'makeup bag', 'passport holder' ≠ 'wallet'). Open description if ambiguous.",
+          "D-GUARD": "Never select variants or proceed to purchase without confirming the accessory's function. Visually similar accessories often serve different purposes."
+        },
+        "synthesized_text": "Verify the accessory's intended function from title and description before configuring it. Visually similar accessories serve different purposes — confirm function before selecting variants.",
+        "utility": 1.0,
+        "retrieval_count": 0
+      },
+      {
+        "skill_id": "acc_002",
+        "title": "Variant-Then-Price Sequence",
+        "when_to_apply": "On a confirmed accessories product page before purchase.",
+        "meta": {
+          "D-EXEC": "Select all required variant options (color, size, material) explicitly. After all selections, re-read the final price for the exact variant combination.",
+          "D-GUARD": "Never assume the default variant is the requested one. Never check price before all variants are set."
+        },
+        "synthesized_text": "Set all required variant options explicitly before reading the final price. Never check price before variants are set.",
+        "utility": 1.0,
+        "retrieval_count": 0
+      }
+    ],
+    "beauty_health": [
+      {
+        "skill_id": "bea_001",
+        "title": "Feature-Keyword Search",
+        "when_to_apply": "Before any beauty or health product search.",
+        "meta": {
+          "D-PLAN": "Include product type plus the key functional keyword ('double-sided', 'long handle', 'sulfate-free') in the initial query. Include price cap as a secondary constraint. Functional keywords in beauty/health are usually searchable in product titles.",
+          "D-GUARD": "Never omit the functional keyword when it is a hard requirement. Never rely on category browsing alone."
+        },
+        "synthesized_text": "Build beauty/health queries around product type plus the key functional keyword. These attributes are usually searchable in titles. Include price cap as a secondary constraint.",
+        "utility": 1.0,
+        "retrieval_count": 0
+      },
+      {
+        "skill_id": "bea_002",
+        "title": "Minimal-Path After Confirmation",
+        "when_to_apply": "After all constraints are verified on a beauty/health product.",
+        "meta": {
+          "D-EXEC": "Once product type, functional attribute, variants, and price are all confirmed, click 'Buy Now' immediately without opening additional products for comparison.",
+          "D-GUARD": "Never continue browsing after a fully-confirmed match. The risk of navigation errors outweighs any benefit from comparison shopping."
+        },
+        "synthesized_text": "Execute 'Buy Now' immediately once a beauty/health product fully satisfies all constraints. Further browsing after a confirmed match introduces unnecessary risk.",
+        "utility": 1.0,
+        "retrieval_count": 0
+      }
+    ],
+    "other": [
+      {
+        "skill_id": "oth_001",
+        "title": "Disciplined Shopping Flow",
+        "when_to_apply": "For every shopping task from start to checkout.",
+        "meta": {
+          "D-PLAN": "Follow the invariant sequence: Search (with all constraints) → Open candidate (scan title first) → Verify category and primary attributes → Set variants → Verify final price → Buy Now. Never skip or reorder steps.",
+          "D-TRACK": "Track progress through the sequence. If a step fails, return to Search rather than trying to patch a fundamentally unsuitable product.",
+          "D-GUARD": "Never attempt purchase before all preceding steps are confirmed. Never stay on a product that has failed any step."
+        },
+        "synthesized_text": "Maintain the invariant shopping sequence: Search → Verify category → Set variants → Verify price → Buy Now. If any step fails, return to Search immediately. This sequence prevents all major categories of purchase error.",
+        "utility": 1.0,
+        "retrieval_count": 0
+      },
+      {
+        "skill_id": "oth_002",
+        "title": "Pagination Before Giving Up",
+        "when_to_apply": "When the first results page lacks suitable items.",
+        "meta": {
+          "D-PLAN": "Before concluding unavailability, navigate to at least one or two additional result pages or try a slightly different query (synonym or slightly broader term).",
+          "D-GUARD": "Never conclude unavailability after only the first results page. Never repeat an identical query expecting different results."
+        },
+        "synthesized_text": "Before concluding a product is unavailable, check additional results pages and try a slightly different query. Never conclude unavailability after a single results page with an unchanged query.",
+        "utility": 1.0,
+        "retrieval_count": 0
+      }
+    ]
+  },
+  "common_mistakes": [
+    {
+      "mistake_id": "err_001",
+      "description": "Search query omits a key constraint, returning a large irrelevant result set.",
+      "why_it_happens": "Agent focuses on main keywords and forgets secondary hard filters like price cap or size.",
+      "how_to_avoid": "Enumerate all constraints before composing any query, then include every hard constraint explicitly."
+    },
+    {
+      "mistake_id": "err_002",
+      "description": "Over-specified query returns zero results.",
+      "why_it_happens": "Agent translates all user constraints directly without considering site vocabulary or using niche color names.",
+      "how_to_avoid": "Use base color families and limit initial query to 2-3 most restrictive attributes. Broaden if results are sparse."
+    },
+    {
+      "mistake_id": "err_003",
+      "description": "Agent opens a product with a clear category mismatch based on misleading thumbnail.",
+      "why_it_happens": "Visual similarity is used as a proxy for category match.",
+      "how_to_avoid": "Read the full product title and category label before clicking. Leave immediately on category mismatch."
+    },
+    {
+      "mistake_id": "err_004",
+      "description": "Agent misses a variant-induced price increase by checking price before all variants are set.",
+      "why_it_happens": "Price is checked on the default variant and assumed to persist.",
+      "how_to_avoid": "Always re-read price after the final variant selection."
+    },
+    {
+      "mistake_id": "err_005",
+      "description": "Agent clicks 'Buy Now' without selecting all required variant options.",
+      "why_it_happens": "Buy Now button is visible and enabled before all options are set.",
+      "how_to_avoid": "Verify every required option is explicitly selected before purchasing."
+    },
+    {
+      "mistake_id": "err_006",
+      "description": "Agent purchases without confirming required non-visible attributes.",
+      "why_it_happens": "Product description is not read; search filters are treated as guarantees.",
+      "how_to_avoid": "Open Description/Features and explicitly locate every non-visible required attribute."
+    },
+    {
+      "mistake_id": "err_007",
+      "description": "Agent persists on an unsuitable product cycling through variants that cannot satisfy all constraints.",
+      "why_it_happens": "Sunk-cost thinking discourages abandoning a page already spent time on.",
+      "how_to_avoid": "After two to three failed variant attempts or any hard-constraint violation, return to search immediately."
+    },
+    {
+      "mistake_id": "err_008",
+      "description": "Agent continues browsing after finding a fully-confirmed matching product.",
+      "why_it_happens": "Comparison-shopping instinct causes unnecessary navigation after a valid match.",
+      "how_to_avoid": "Execute 'Buy Now' immediately after all constraints are confirmed."
+    }
+  ],
+  "metadata": {
+    "source": "regenerated from WebShop trajectories with 4-dimension schema",
+    "schema_version": "3.0",
+    "meta_dimensions": ["D-PLAN", "D-TRACK", "D-EXEC", "D-GUARD"],
+    "dimension_descriptions": {
+      "D-PLAN": "Overall strategy decomposition and search/exploration heuristics",
+      "D-TRACK": "Continuous tracking of object states, positions, and task progress",
+      "D-EXEC": "Fine-grained action execution details and operation sequences",
+      "D-GUARD": "Explicit constraints against common failure modes and error patterns"
+    },
+    "total_memories_analyzed": 200,
+    "product_distribution": {
+      "apparel": {"success": 65, "failure": 55},
+      "footwear": {"success": 17, "failure": 7},
+      "home_decor": {"success": 5, "failure": 7},
+      "electronics": {"success": 4, "failure": 2},
+      "accessories": {"success": 4, "failure": 1},
+      "beauty_health": {"success": 3, "failure": 0},
+      "other": {"success": 22, "failure": 8}
+    }
+  }
+}

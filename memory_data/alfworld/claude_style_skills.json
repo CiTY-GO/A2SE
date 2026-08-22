@@ -1,0 +1,428 @@
+{
+  "general_skills": [
+    {
+      "skill_id": "gen_001",
+      "title": "Goal-Driven Room Sweep",
+      "when_to_apply": "At episode start and whenever the current search area is exhausted without finding the goal object.",
+      "meta": {
+        "D-PLAN": "Decompose the task into an ordered checklist: (1) identify all candidate locations for the goal object based on object category priors, (2) visit each location exactly once in a logical spatial order (e.g., left-to-right, near-to-far), (3) extend to secondary locations only after exhausting primary candidates. Never revisit a confirmed-empty location unless the environment signals a state change.",
+        "D-TRACK": "Maintain two sets: SEARCHED (locations fully inspected this episode) and PENDING (locations not yet visited). After each inspection, move the location from PENDING to SEARCHED. If the goal object is found, record its location immediately.",
+        "D-GUARD": "Never restart the sweep from the beginning when a location is empty — always advance to the next PENDING candidate. Do not attempt to place or transform any object before it is in hand. Maintain a SEARCHED set updated after every inspection and always select the next target from the PENDING set — never return to a SEARCHED location unless the environment signals a state change there."
+      },
+      "synthesized_text": "At episode start, decompose the task into an ordered checklist of candidate locations ranked by object-category priors, then visit each exactly once in a logical spatial order. Maintain two explicit sets throughout: SEARCHED (fully inspected locations) and PENDING (not yet visited); after each inspection move the location from PENDING to SEARCHED and always choose the next destination from PENDING. Open every closed container encountered during the sweep and observe its contents before advancing. Never restart the sweep from the beginning when a location is empty — always advance to the next PENDING candidate. Never return to a SEARCHED location unless the environment explicitly signals a state change there.",
+      "utility": 1.0,
+      "retrieval_count": 0
+    },
+    {
+      "skill_id": "gen_002",
+      "title": "Immediate Acquisition on Sight",
+      "when_to_apply": "The moment a goal-relevant object becomes visible and reachable.",
+      "meta": {
+        "D-PLAN": "Treat any visible, reachable goal object as the highest-priority sub-task: interrupt ongoing exploration and issue 'take [object]' as the very next action. Resume exploration only after the pickup is confirmed.",
+        "D-TRACK": "Update the held-object inventory immediately after a successful take action. If multiple goal objects are needed, decrement the outstanding count.",
+        "D-GUARD": "Never walk away from a visible goal object to continue exploration — this leads to losing track of it and wasting steps on a redundant search. Immediately interrupt any ongoing exploration upon sighting a goal object and issue the take action as the very next step — do not defer pickup to finish a sweep."
+      },
+      "synthesized_text": "Treat any visible, reachable goal object as the highest-priority sub-task and immediately interrupt ongoing exploration to issue the take action as the very next step. Do not defer pickup to finish a room sweep or reach a planned waypoint — acting on sight is always faster than completing an arbitrary search order. Update the held-object inventory immediately after a successful take, and if multiple goal objects are needed decrement the outstanding count. Resume exploration only after pickup is confirmed in the observation feedback. Never walk away from a visible goal object for any reason; deferring pickup reliably leads to losing its location and wasting steps on a redundant search.",
+      "utility": 1.0,
+      "retrieval_count": 0
+    },
+    {
+      "skill_id": "gen_003",
+      "title": "Deliver Before Resuming Search",
+      "when_to_apply": "Holding any goal object when its target receptacle is known.",
+      "meta": {
+        "D-PLAN": "Once holding a goal object with an identified destination, delivery is the sole active sub-goal. Navigate directly to the target receptacle and execute 'put [object] in/on [receptacle]' before considering any other action.",
+        "D-TRACK": "Confirm the object is in hand and the destination is identified. After successful placement, update the delivered count and determine whether more objects are needed.",
+        "D-GUARD": "Do not detour to pick up additional items or continue exploring while carrying an undelivered goal object to a known destination — this risks missing the delivery window and extending episode length unnecessarily."
+      },
+      "synthesized_text": "Once holding a goal object with an identified destination, make delivery the sole active sub-goal and navigate directly to the target receptacle without detours. Issue 'put [object] in/on [receptacle]' immediately upon arrival; confirm placement from the observation feedback before considering any further action. After successful placement, update the delivered count and determine whether more objects are still needed before resuming search. Do not pick up additional items or continue exploring while carrying an undelivered goal object to a known destination. Detours during the delivery leg extend episode length unnecessarily and risk missing the placement window.",
+      "utility": 1.0,
+      "retrieval_count": 0
+    },
+    {
+      "skill_id": "gen_004",
+      "title": "Explicit Progress Counting",
+      "when_to_apply": "Throughout any multi-instance task (e.g., 'put two X in Y').",
+      "meta": {
+        "D-PLAN": "At task start, extract the required count N from the goal description. Structure the plan as N identical acquire-deliver cycles. After each cycle completes, check whether the counter has reached zero before terminating or switching tasks.",
+        "D-TRACK": "Maintain three counters: NEEDED (initial goal count), HELD (objects currently in hand), PLACED (objects successfully delivered). Update all three after every pickup and placement. Issue 'done' only when PLACED == NEEDED.",
+        "D-GUARD": "Never issue 'done' while PLACED < NEEDED. Never stop searching while HELD + PLACED < NEEDED. Maintain an explicit REMAINING counter (REMAINING = NEEDED − PLACED); only issue done or halt searching when REMAINING == 0."
+      },
+      "synthesized_text": "At task start, extract the required count N from the goal description and structure the plan as N identical acquire-deliver cycles. Maintain three explicit counters throughout: NEEDED (initial goal count), HELD (objects currently in hand), and PLACED (objects successfully delivered); update all three after every pickup and placement. Compute REMAINING = NEEDED − PLACED after each delivery and only issue done or halt searching when REMAINING == 0. Never issue done while PLACED < NEEDED, and never stop searching while HELD + PLACED < NEEDED. Check the counter explicitly before any termination action — do not rely on confidence or apparent task completion.",
+      "utility": 1.0,
+      "retrieval_count": 0
+    },
+    {
+      "skill_id": "gen_005",
+      "title": "State-Change Waypoint",
+      "when_to_apply": "After acquiring an object that requires a temperature or cleanliness transformation before placement.",
+      "meta": {
+        "D-PLAN": "Plan the route as: acquire object → navigate to transformation appliance → apply transformation → navigate to final destination → place. Locate the required appliance (microwave/fridge/sink/basin) before or immediately after object pickup.",
+        "D-TRACK": "Track the object's current state (raw/hot/cold/clean/dirty). Only transition to the final-destination phase after the transformation is confirmed complete in the observation feedback.",
+        "D-GUARD": "Never attempt placement at the goal location before the required state transformation is confirmed complete. Never navigate to the final destination while skipping the transformation waypoint. Treat the transformation appliance as a mandatory waypoint in the plan — never skip it regardless of distance or apparent shortcut."
+      },
+      "synthesized_text": "After acquiring an object that requires transformation, plan the route as: acquire → transformation appliance → apply transformation → final destination → place. Locate the required appliance (microwave, fridge, sink, or basin) before or immediately after object pickup, and treat it as a mandatory waypoint — never skip it regardless of distance or apparent shortcut. Track the object's current state (raw, hot, cold, clean, dirty) and only transition to the final-destination phase after the transformation is confirmed complete in the observation feedback. Never attempt placement at the goal location before the required state transformation is confirmed complete. Never navigate to the final destination while bypassing the transformation step.",
+      "utility": 1.0,
+      "retrieval_count": 0
+    },
+    {
+      "skill_id": "gen_006",
+      "title": "Open Before Ruling Out",
+      "when_to_apply": "Encountering any closed container (drawer, cabinet, fridge, microwave, box) during search.",
+      "meta": {
+        "D-PLAN": "Treat every closed container as unexplored by definition. Include it in the sweep checklist and plan to open it before moving on to the next candidate.",
+        "D-EXEC": "Issue 'open [container]' then observe contents before deciding the container is empty and moving on. Never assume contents based on prior knowledge without opening first.",
+        "D-GUARD": "Never skip a closed container or assume it is empty — unopened containers are the most common source of missed goal objects. Every closed container is unexplored by definition — open and inspect each one at least once before ruling it out as a candidate."
+      },
+      "synthesized_text": "Treat every closed container as unexplored by definition and include it in the sweep checklist. Issue 'open [container]' and observe the contents before deciding the container is empty and moving on — never assume contents based on prior knowledge without opening first. Open and inspect each closed container at least once before ruling it out as a candidate; unopened containers are the most common source of missed goal objects. After opening, record whether the goal object was found and update SEARCHED/PENDING accordingly. Never skip a closed container during the search sweep.",
+      "utility": 1.0,
+      "retrieval_count": 0
+    },
+    {
+      "skill_id": "gen_007",
+      "title": "Spatial Relation Navigation",
+      "when_to_apply": "Goal specifies a spatial relationship (under, inside, on, in front of) between the target object and a reference object.",
+      "meta": {
+        "D-PLAN": "Locate the reference object first to constrain the search space for the target. Plan to find both objects, treating their co-location as the terminal condition rather than independent sub-goals.",
+        "D-EXEC": "Navigate to the reference object's location. If the reference object has a state prerequisite (e.g., lamp must be on), adjust its state before or immediately after handling the target. Then place or find the target in the specified spatial relation.",
+        "D-GUARD": "Do not search for the target object independently across the entire room — restrict the target search to the vicinity of the reference object."
+      },
+      "synthesized_text": "When the goal specifies a spatial relation (under, inside, on, in front of), locate the reference object first to constrain the search space for the target. Treat the co-location of target and reference object as the terminal condition rather than pursuing them as independent sub-goals. Navigate to the reference object's location; if it has a state prerequisite (e.g., lamp must be on), adjust its state before or immediately after handling the target. Then place or find the target in the specified spatial relation to the reference object. Do not search for the target across the entire room independently — restricting the search to the reference object's vicinity eliminates the majority of wasted steps.",
+      "utility": 1.0,
+      "retrieval_count": 0
+    },
+    {
+      "skill_id": "gen_008",
+      "title": "Verify Before Done",
+      "when_to_apply": "Before issuing the 'done' action at any point in the episode.",
+      "meta": {
+        "D-TRACK": "Run a final goal-state verification: confirm each goal predicate explicitly (correct object placed, required state satisfied, count met). If any predicate is unverified, continue the task.",
+        "D-GUARD": "Never issue 'done' based on confidence alone or because the step limit is near. Issue 'done' only after every goal predicate is explicitly verified. Premature termination when goal conditions are not fully satisfied is unrecoverable. Before issuing done, explicitly verify all four goal predicates: correct object type, correct location, correct state, and correct count."
+      },
+      "synthesized_text": "Before issuing the done action at any point, run an explicit final goal-state verification covering all four predicates. Confirm in sequence: correct object type is placed, correct location is used, required state (hot, cold, clean) is satisfied, and required count is met. If any predicate is unverified, continue the task until all conditions are explicitly confirmed in the observation feedback. Never issue done based on confidence alone or because the step limit is near — premature termination when any predicate is unverified is unrecoverable. Only issue done after every goal predicate passes explicit verification.",
+      "utility": 1.0,
+      "retrieval_count": 0
+    }
+  ],
+  "task_specific_skills": {
+    "pick_and_place": [
+      {
+        "skill_id": "pic_001",
+        "title": "Category-Prior First Pass",
+        "when_to_apply": "At the start of a pick-and-place task before the goal object has been located.",
+        "meta": {
+          "D-PLAN": "Use object-category priors to order the search: kitchen utensils → countertop/stove/cabinet; clothing → wardrobe/dresser/bed; books → bookshelf/desk. Begin at the highest-probability surface, sweep to secondary surfaces if not found, and only then check low-probability locations. Open every closed container encountered during the sweep.",
+          "D-TRACK": "Mark each candidate location as SEARCHED immediately after inspection. Advance to the next PENDING location without backtracking.",
+          "D-GUARD": "Do not begin at a random or low-probability location. Do not revisit SEARCHED locations during the first pass."
+        },
+        "synthesized_text": "Open the episode by targeting the highest-probability locations for the object type based on category priors — kitchen utensils to countertop or cabinet, clothing to wardrobe or dresser, books to shelf or desk. Visit each candidate location exactly once in a logical spatial order, opening every closed container encountered along the way. Mark each inspected location as SEARCHED immediately and always advance to the next PENDING candidate without backtracking. Do not begin at a random or low-probability location; do not revisit SEARCHED locations during the first pass. Extend to secondary locations only after exhausting all primary candidates.",
+        "utility": 1.0,
+        "retrieval_count": 0
+      },
+      {
+        "skill_id": "pic_002",
+        "title": "Grab-Then-Place Discipline",
+        "when_to_apply": "Throughout the entire pick-and-place episode after the goal object is located.",
+        "meta": {
+          "D-PLAN": "Execute a strict two-phase loop: (1) acquire — take the goal object the instant it is visible; (2) deliver — navigate directly to the target receptacle and place it. Do not interleave acquisition and delivery with additional exploration.",
+          "D-EXEC": "Issue 'take [object]' immediately upon sighting the goal object. Then issue 'go to [receptacle]' followed by 'put [object] in/on [receptacle]' without detours.",
+          "D-GUARD": "Never leave a visible goal object uncollected. Never detour after picking up the object — delivery takes priority."
+        },
+        "synthesized_text": "Execute a strict two-phase loop for every pick-and-place episode: first acquire the goal object the instant it is visible, then deliver it directly to the target receptacle without detours. Issue 'take [object]' immediately upon sighting the goal object, then issue 'go to [receptacle]' followed by 'put [object] in/on [receptacle]' without interleaving any additional exploration. Never leave a visible goal object uncollected to continue searching. Never detour after picking up the object — delivery takes absolute priority once the object is in hand. Only resume exploration for the next instance after placement is confirmed.",
+        "utility": 1.0,
+        "retrieval_count": 0
+      },
+      {
+        "skill_id": "pic_003",
+        "title": "Multi-Instance Count Loop",
+        "when_to_apply": "Tasks requiring two or more instances of the same object type.",
+        "meta": {
+          "D-PLAN": "Treat multi-instance tasks as N independent acquire-deliver cycles. After each delivery, decrement the outstanding count and immediately resume search for the next instance. Do not attempt to carry multiple objects simultaneously unless the task explicitly requires it.",
+          "D-TRACK": "Maintain a REMAINING counter (initialized to N). Decrement after each successful placement. Resume acquisition search only when REMAINING > 0. Issue 'done' only when REMAINING == 0.",
+          "D-GUARD": "Do not stop searching while REMAINING > 0. Do not issue 'done' prematurely."
+        },
+        "synthesized_text": "For multi-instance pick-and-place tasks, run N sequential acquire-deliver cycles tracked by a REMAINING counter initialized to N. Decrement REMAINING after each confirmed placement and resume acquisition search only when REMAINING > 0. Do not attempt to carry multiple objects simultaneously unless the task explicitly requires it. Do not stop searching while REMAINING > 0, and do not issue done prematurely before REMAINING reaches 0. Treat each cycle as an independent acquire-deliver unit with its own PENDING search list.",
+        "utility": 1.0,
+        "retrieval_count": 0
+      }
+    ],
+    "look_at_obj_in_light": [
+      {
+        "skill_id": "loo_001",
+        "title": "Lamp-Anchored Search Strategy",
+        "when_to_apply": "At the start of a look-at-object-under-desklamp task.",
+        "meta": {
+          "D-PLAN": "The desklamp is the reference object; its location defines where the target must end up. Head immediately to furniture that commonly hosts a desklamp (desk, sidetable, nightstand). If the target is co-located with the lamp, act there. If not, acquire the target first, then bring it to the lamp.",
+          "D-TRACK": "Track: (a) whether a desklamp has been located, (b) the lamp's on/off state, (c) whether the target object is held or co-located with the lit lamp.",
+          "D-GUARD": "Do not search for the target across the entire room independently of the desklamp's location. Do not toggle the lamp more than once — one 'use desklamp' is sufficient."
+        },
+        "synthesized_text": "Begin every look-at-object-under-desklamp task by heading immediately to furniture that commonly hosts a desklamp — desk, sidetable, or nightstand — because the lamp location defines where the target must end up. Track three conditions throughout: whether a desklamp has been located, the lamp's on/off state, and whether the target object is held or co-located with the lit lamp. If the target is co-located with the lamp, act there immediately; if not, acquire the target first and bring it to the lamp location. Do not search for the target across the entire room independently of the desklamp's location. Issue one lamp-toggle after the target is co-located — do not toggle the lamp more than once.",
+        "utility": 1.0,
+        "retrieval_count": 0
+      },
+      {
+        "skill_id": "loo_002",
+        "title": "Co-Location Completion Check",
+        "when_to_apply": "When both the target object and a lit desklamp are at the same location.",
+        "meta": {
+          "D-EXEC": "If the target is on the lit surface, issue 'take [target]' then 'use desklamp' (if lamp is off) in that order. If both are already co-located with the lamp on, the goal may already be met — verify before issuing any further actions.",
+          "D-GUARD": "Do not move away from a location where both the target and desklamp are present. Leaving a co-located pair behind to continue searching is an unrecoverable waste of steps."
+        },
+        "synthesized_text": "When both the target object and a lit desklamp are present at the same location, act immediately without moving away. If the target is on the lit surface, issue 'take [target]' then 'use desklamp' if the lamp is off; if both are already co-located with the lamp on, verify the goal condition before issuing any further action. Do not move away from a location where both the target and desklamp are present — leaving a co-located pair behind to continue searching is an unrecoverable waste of steps. Confirm the goal state from observation feedback before issuing done. This co-location check supersedes any ongoing search plan.",
+        "utility": 1.0,
+        "retrieval_count": 0
+      },
+      {
+        "skill_id": "loo_003",
+        "title": "Systematic Lamp-Surface Sweep",
+        "when_to_apply": "After the first lamp-hosting surface is exhausted without finding the target.",
+        "meta": {
+          "D-PLAN": "Enumerate all lamp-hosting furniture in the room (desk, sidetable, nightstand, dresser). Visit each one, toggle the lamp on if present, search its immediate surfaces and nearby containers once, then move on. Mark each lamp surface as SEARCHED.",
+          "D-GUARD": "Do not re-examine an already-searched lamp surface. Do not toggle the same lamp multiple times or revisit empty spots. Issue the lamp-toggle action exactly once after the target is co-located with the desklamp; mark the lamp as toggled and never repeat the toggle action."
+        },
+        "synthesized_text": "When the first lamp-hosting surface is exhausted without finding the target, enumerate all lamp-hosting furniture in the room and plan a sequential sweep. Visit each lamp surface once: toggle the lamp on if present, search its immediate surface and nearby containers, mark it as SEARCHED, then advance to the next. Issue the lamp-toggle action exactly once after the target is co-located with the desklamp — mark the lamp as toggled and never repeat the action. Do not re-examine an already-searched lamp surface or revisit empty spots. Advance to the next unvisited lamp surface rather than cycling back to confirmed-empty locations.",
+        "utility": 1.0,
+        "retrieval_count": 0
+      },
+      {
+        "skill_id": "loo_004",
+        "title": "Acquire-Then-Illuminate",
+        "when_to_apply": "At the start of any look-at-object-under-light task when the desklamp location is unknown.",
+        "meta": {
+          "D-PLAN": "Two strategies based on what is visible first: (A) if both target and desklamp are visible at the same location, act there immediately; (B) if only the target is visible, take it first and carry it to the nearest desklamp. Locate desklamp-hosting furniture (desk, sidetable, nightstand) early in the episode.",
+          "D-EXEC": "After co-locating target and lamp: issue 'use desklamp' once to illuminate, then verify the goal condition. Issue 'take [target]' only if it is not already in hand at the lamp location.",
+          "D-GUARD": "Never leave a location where both the target and desklamp are present. Never toggle the lamp more than once — repeated toggles waste steps without changing the goal state."
+        },
+        "synthesized_text": "For look-at-object tasks, apply one of two strategies based on what is visible first: if both target and desklamp are visible at the same location act there immediately; if only the target is visible take it first and carry it to the nearest desklamp. Locate desklamp-hosting furniture (desk, sidetable, nightstand) early in the episode to minimize carrying distance. After co-locating target and lamp, issue 'use desklamp' exactly once to illuminate, then verify the goal condition. Never leave a location where both the target and desklamp are present. Never toggle the lamp more than once — repeated toggles waste steps without advancing the goal state.",
+        "utility": 1.0,
+        "retrieval_count": 0
+      },
+      {
+        "skill_id": "loo_005",
+        "title": "Target-Priority Pickup",
+        "when_to_apply": "Target object is visible but desklamp location is unknown.",
+        "meta": {
+          "D-PLAN": "When the target is visible but the desklamp location is unknown, take the target immediately — it can then be carried to wherever the desklamp is found. Searching for the desklamp first while the target is visible risks losing the target's location.",
+          "D-GUARD": "Never leave the target behind to search for the desklamp first."
+        },
+        "synthesized_text": "If the target object is visible but the desklamp location is unknown, take the target immediately — carrying it allows delivery to wherever the desklamp is found rather than making two separate trips. Searching for the desklamp first while the target is visible risks losing the target's location and requiring a redundant search later. After picking up the target, navigate to lamp-hosting furniture (desk, sidetable, nightstand) to locate the desklamp. Never leave the target behind to search for the desklamp first. Once both are co-located, toggle the lamp once and verify the goal condition.",
+        "utility": 1.0,
+        "retrieval_count": 0
+      },
+      {
+        "skill_id": "loo_006",
+        "title": "Unvisited Surface Priority",
+        "when_to_apply": "Either required object remains unfound after the current search area is exhausted.",
+        "meta": {
+          "D-PLAN": "When either the target or desklamp is not yet found, systematically visit unexamined surfaces and containers. Prioritize lamp-hosting furniture (desk, sidetable, nightstand) for the desklamp search.",
+          "D-TRACK": "Maintain a SEARCHED set. Always select the next unvisited candidate from PENDING rather than re-examining confirmed-empty locations.",
+          "D-GUARD": "Never re-inspect surfaces already confirmed empty. Never return to a location without new evidence that it now contains a required object."
+        },
+        "synthesized_text": "When either the target or desklamp is still missing, systematically advance to unvisited surfaces and containers rather than revisiting confirmed-empty locations. Prioritize lamp-hosting furniture (desk, sidetable, nightstand) for the desklamp search and apply object-category priors for the target search. Maintain a SEARCHED set and always select the next candidate from PENDING rather than re-examining known-empty locations. Never re-inspect surfaces already confirmed empty. Never return to a location without new evidence that it now contains a required object.",
+        "utility": 1.0,
+        "retrieval_count": 0
+      }
+    ],
+    "pick_two": [
+      {
+        "skill_id": "ptw_001",
+        "title": "Sequential One-at-a-Time Cycles",
+        "when_to_apply": "At the start of any pick-two task requiring two instances of the same object type.",
+        "meta": {
+          "D-PLAN": "Never attempt to carry two objects simultaneously. Structure the task as two strictly sequential acquire-deliver cycles: (1) find and acquire the first instance, deliver it to the target receptacle, confirm placement; (2) then and only then begin searching for the second instance. Treat the second cycle as a fresh pick-and-place sub-task.",
+          "D-TRACK": "Maintain a REMAINING counter initialized to 2. Decrement after each confirmed placement. Do not start cycle 2 until cycle 1 placement is confirmed.",
+          "D-GUARD": "Do not pick up a second object before delivering the first. Do not navigate to the receptacle empty-handed."
+        },
+        "synthesized_text": "Structure every pick-two task as two strictly sequential one-object acquire-deliver cycles — never attempt to carry two objects simultaneously. Complete cycle 1 fully (acquire first instance, deliver, confirm placement) before starting cycle 2. Maintain a REMAINING counter initialized to 2 and decrement after each confirmed placement; do not start cycle 2 until cycle 1 placement is confirmed. Do not pick up a second object before delivering the first, and do not navigate to the receptacle empty-handed. Treat cycle 2 as a fresh pick-and-place sub-task with its own PENDING search list.",
+        "utility": 1.0,
+        "retrieval_count": 0
+      },
+      {
+        "skill_id": "ptw_002",
+        "title": "REMAINING Counter Discipline",
+        "when_to_apply": "Throughout the entire pick-two episode after each pickup and placement.",
+        "meta": {
+          "D-TRACK": "Maintain three counters: NEEDED=2, HELD (0 or 1), PLACED (0, 1, or 2). Update HELD immediately after each 'take' action. Update PLACED immediately after each confirmed 'put' action. Issue 'done' only when PLACED==2.",
+          "D-GUARD": "Never issue 'done' when PLACED < 2. Never stop searching when HELD + PLACED < 2. The most common failure is issuing 'done' after the first placement while PLACED==1."
+        },
+        "synthesized_text": "Track NEEDED=2, HELD, and PLACED counters throughout every pick-two episode; update HELD immediately after each take and PLACED immediately after each confirmed put. Issue done only when PLACED == 2; the most common failure is issuing done after the first placement while PLACED == 1. Never issue done when PLACED < 2, and never stop searching when HELD + PLACED < 2. After each placement, explicitly check PLACED before deciding whether to resume search or terminate. A REMAINING value of 0 is the only valid termination condition.",
+        "utility": 1.0,
+        "retrieval_count": 0
+      },
+      {
+        "skill_id": "ptw_003",
+        "title": "Second-Instance Search Strategy",
+        "when_to_apply": "After the first instance is successfully delivered and PLACED==1.",
+        "meta": {
+          "D-PLAN": "After first delivery, resume search for the second instance of the same object type. The second instance is likely in a different location from the first — exclude the already-searched location and prioritize new candidate surfaces. Apply category-prior ordering: search the same furniture type where the first was found before expanding to secondary locations.",
+          "D-TRACK": "Record where the first instance was found. Mark that location as DEPLETED for this object type. Advance the search to the next PENDING candidate.",
+          "D-GUARD": "Do not return to the exact spot where the first instance was found expecting a second — the same slot is now empty. Do not issue 'done' before the second placement is confirmed."
+        },
+        "synthesized_text": "After the first delivery (PLACED == 1), resume search for the second instance of the same object type, excluding the already-searched location. Mark the first-found location as DEPLETED for this object type and advance to the next PENDING candidate — the same slot is now empty. Apply category-prior ordering: search the same furniture type where the first was found before expanding to secondary locations. Do not return to the exact spot where the first instance was found expecting a second. Do not issue done before the second placement is confirmed and PLACED == 2.",
+        "utility": 1.0,
+        "retrieval_count": 0
+      }
+    ],
+    "clean": [
+      {
+        "skill_id": "cle_001",
+        "title": "Four-Phase Clean Sequence",
+        "when_to_apply": "At the start of any clean task.",
+        "meta": {
+          "D-PLAN": "Clean tasks follow a fixed four-phase sequence: (1) locate target object using category priors, (2) acquire it immediately upon sighting, (3) navigate to the nearest sink/basin and clean it, (4) navigate to the final destination and place. Never skip or reorder phases.",
+          "D-TRACK": "Track the current active phase. Transition only when the current phase is fully confirmed complete (e.g., cleaning confirmed by observation feedback before moving to phase 4).",
+          "D-GUARD": "Never attempt placement before cleaning is confirmed complete. Never navigate to the final destination while the object is still dirty."
+        },
+        "synthesized_text": "Execute every clean task as a strict four-phase sequence: locate the target object using category priors, acquire it immediately upon sighting, navigate to the nearest sink or basin and clean it, then navigate to the final destination and place it. Track the current active phase and only transition when the current phase is fully confirmed complete from observation feedback. Never skip or reorder phases — in particular, never navigate to the final destination while the object is still dirty. Never attempt placement before cleaning is confirmed complete. Locate the sink before or during the acquisition route to minimize travel after pickup.",
+        "utility": 1.0,
+        "retrieval_count": 0
+      },
+      {
+        "skill_id": "cle_002",
+        "title": "Sink-First After Pickup",
+        "when_to_apply": "Immediately after acquiring the target object in a clean task.",
+        "meta": {
+          "D-PLAN": "Upon holding the target object, the next sub-goal is always the nearest sink or basin — not the final destination. Locate the sink before or as part of the acquisition route.",
+          "D-EXEC": "Navigate directly to the nearest sink and issue the clean action (e.g., 'clean [object] under faucet', 'use sink') before any placement action.",
+          "D-GUARD": "Never navigate to the goal placement location before the cleaning step is complete."
+        },
+        "synthesized_text": "Upon holding the target object in a clean task, make the nearest sink or basin the immediate next destination — not the final placement location. Locate the sink before or as part of the acquisition route so that the path from pickup to sink is as short as possible. Issue the clean action (e.g., 'clean [object] under faucet' or 'use sink') immediately upon arrival at the sink, before any placement action. Never navigate to the goal placement location before the cleaning step is complete. Only after cleaning is confirmed in observation feedback should the route to the final destination begin.",
+        "utility": 1.0,
+        "retrieval_count": 0
+      },
+      {
+        "skill_id": "cle_003",
+        "title": "State Verify Before Place",
+        "when_to_apply": "After completing the cleaning action and before navigating to the placement destination.",
+        "meta": {
+          "D-TRACK": "After the cleaning action, confirm from observation feedback that the object's state is now 'clean'. If the feedback is ambiguous or negative, repeat the cleaning action before advancing.",
+          "D-GUARD": "Never place the object at the goal location without explicit confirmation that it is clean. Placing a still-dirty object at the destination does not satisfy the goal condition."
+        },
+        "synthesized_text": "After the cleaning action, confirm from observation feedback that the object's state is now marked clean before advancing to the placement destination. If the feedback is ambiguous or negative, repeat the cleaning action rather than proceeding. Never place the object at the goal location without explicit confirmation that it is clean — placing a still-dirty object does not satisfy the goal condition and wastes the remaining steps. Only after the clean state is confirmed should navigation to the final destination begin. This verification step is mandatory even when the cleaning action appeared to execute correctly.",
+        "utility": 1.0,
+        "retrieval_count": 0
+      }
+    ],
+    "heat": [
+      {
+        "skill_id": "hea_001",
+        "title": "Acquire-Heat-Place Pipeline",
+        "when_to_apply": "At the start of any heat task.",
+        "meta": {
+          "D-PLAN": "Heat tasks follow a strict three-phase pipeline: (1) locate and acquire the exact target object (verify type match before pickup), (2) navigate to the microwave, open the door, place the object inside, and heat it, (3) retrieve the heated object and navigate directly to the placement destination. Locate the microwave before or during the acquisition phase.",
+          "D-GUARD": "Never navigate to the microwave or placement destination before the correct object is in hand. Never attempt to place an object at the goal before it has been heated."
+        },
+        "synthesized_text": "Execute every heat task as a strict three-phase pipeline: locate and acquire the exact target object with type verification, navigate to the microwave and heat the object, then retrieve it and deliver to the placement destination. Locate the microwave before or during the acquisition phase to plan the most efficient route. Never navigate to the microwave or placement destination before the correct object is in hand. Never attempt to place an object at the goal before it has been heated. Confirm each phase transition from observation feedback before advancing to the next phase.",
+        "utility": 1.0,
+        "retrieval_count": 0
+      },
+      {
+        "skill_id": "hea_002",
+        "title": "Microwave Operation Sequence",
+        "when_to_apply": "Upon arriving at the microwave with the target object in hand.",
+        "meta": {
+          "D-EXEC": "At the microwave: (1) issue 'open microwave', (2) issue 'put [object] in microwave', (3) issue 'close microwave' (if required by environment), (4) issue 'turn on microwave' or 'heat [object]'. After heating, take the object back before navigating to the placement destination.",
+          "D-GUARD": "Never attempt to place an object in the microwave without first opening the door. Never leave the microwave area without retrieving the heated object."
+        },
+        "synthesized_text": "At the microwave, execute the operation in strict order: open the microwave door, place the object inside, activate heating, wait for the heated confirmation in observation feedback, then take the object back. Never attempt to place an object in the microwave without first opening the door. Never leave the microwave area without retrieving the heated object. After retrieving the heated object, navigate directly to the placement destination without detours. Confirm the heated state from observation feedback before leaving the microwave.",
+        "utility": 1.0,
+        "retrieval_count": 0
+      },
+      {
+        "skill_id": "hea_003",
+        "title": "Exact Object Verification",
+        "when_to_apply": "Before picking up any candidate object during a heat task.",
+        "meta": {
+          "D-TRACK": "Before issuing 'take', verify that the candidate object's type exactly matches the goal specification (e.g., 'cup' ≠ 'mug', 'apple' ≠ 'tomato'). Only pick up the exact match.",
+          "D-GUARD": "Never pick up a look-alike or substitute object. Never interact with the microwave or placement destination while holding the wrong object type. Before every take action, verify the object type exactly matches the goal specification; if a mismatch is discovered after pickup, drop the object immediately and resume the search."
+        },
+        "synthesized_text": "Before issuing any take action during a heat task, verify that the candidate object's type exactly matches the goal specification — cup and mug are not interchangeable, nor are apple and tomato. Only pick up the exact match; examine the object first if the type is ambiguous. If a mismatch is discovered after pickup, drop the object immediately and resume the search rather than proceeding to the microwave with the wrong item. Never interact with the microwave or the placement destination while holding a mismatched object type. Type verification at the pickup stage is the only reliable point at which this error can be prevented.",
+        "utility": 1.0,
+        "retrieval_count": 0
+      }
+    ],
+    "cool": [
+      {
+        "skill_id": "coo_001",
+        "title": "Acquire-Cool-Place Pipeline",
+        "when_to_apply": "At the start of any cool task.",
+        "meta": {
+          "D-PLAN": "Cool tasks follow a strict three-phase pipeline: (1) locate and acquire the exact target object (verify type match), (2) navigate to the fridge, open the door, place the object inside to cool it, (3) retrieve the cooled object and navigate to the placement destination. Locate the fridge before or during acquisition.",
+          "D-GUARD": "Never navigate to the fridge or placement destination before the correct object is in hand. Never attempt to place an object at the goal before it has been cooled."
+        },
+        "synthesized_text": "Execute every cool task as a strict three-phase pipeline: locate and acquire the exact target object with type verification, navigate to the fridge and cool the object, then retrieve it and deliver to the placement destination. Locate the fridge before or during the acquisition phase to plan the most efficient route. Never navigate to the fridge or placement destination before the correct object is in hand. Never attempt to place an object at the goal before it has been cooled. Confirm each phase transition from observation feedback before advancing to the next phase.",
+        "utility": 1.0,
+        "retrieval_count": 0
+      },
+      {
+        "skill_id": "coo_002",
+        "title": "Fridge Operation Sequence",
+        "when_to_apply": "Upon arriving at the fridge with the target object in hand.",
+        "meta": {
+          "D-EXEC": "At the fridge: (1) issue 'open fridge', (2) issue 'put [object] in fridge', (3) wait one step or issue the cool action if required, (4) issue 'take [object]' to retrieve the cooled item. Confirm the object is now cooled before leaving.",
+          "D-TRACK": "Track the object's temperature state. Only advance to the placement phase after 'cooled' is confirmed in observation feedback.",
+          "D-GUARD": "Never place the object at the goal location before retrieving it from the fridge and confirming it is cooled."
+        },
+        "synthesized_text": "At the fridge, execute the operation in strict order: open the fridge door, place the object inside, execute the cooling step, confirm the cooled state from observation feedback, then take the object back. Track the object's temperature state and only advance to the placement phase after cooled is confirmed. Never place the object at the goal location before retrieving it from the fridge and confirming it is cooled. After retrieving the cooled object, navigate directly to the placement destination without detours. Never leave the fridge area without the cooled object in hand.",
+        "utility": 1.0,
+        "retrieval_count": 0
+      },
+      {
+        "skill_id": "coo_003",
+        "title": "Type Match Before Fridge",
+        "when_to_apply": "Before picking up any candidate object during a cool task.",
+        "meta": {
+          "D-TRACK": "Verify the candidate object's type exactly matches the goal specification before issuing 'take'. If the wrong object is picked up, drop it immediately and resume search.",
+          "D-GUARD": "Never proceed to the fridge with a mismatched object type. The error of cooling the wrong object is avoidable only at the pickup stage. Before every take action, verify the object type exactly matches the goal specification; if a mismatch is discovered after pickup, drop the object immediately and resume the search."
+        },
+        "synthesized_text": "Before issuing any take action during a cool task, verify that the candidate object's type exactly matches the goal specification. Only pick up the exact match; examine the object first if the type is ambiguous. If a mismatch is discovered after pickup, drop the object immediately and resume the search — never proceed to the fridge with a mismatched object type. The error of cooling the wrong object is avoidable only at the pickup stage; catching the mismatch later wastes the cooling cycle and may exhaust remaining steps. Never navigate to the fridge or placement destination while holding an object that does not match the goal specification.",
+        "utility": 1.0,
+        "retrieval_count": 0
+      }
+    ]
+  },
+  "common_mistakes": [],
+  "metadata": {
+    "source": "regenerated from ALFWorld trajectories with 4-dimension schema",
+    "schema_version": "3.0",
+    "meta_dimensions": [
+      "D-PLAN",
+      "D-TRACK",
+      "D-EXEC",
+      "D-GUARD"
+    ],
+    "dimension_descriptions": {
+      "D-PLAN": "Overall strategy decomposition and search/exploration heuristics",
+      "D-TRACK": "Continuous tracking of object states, positions, and task progress",
+      "D-EXEC": "Fine-grained action execution details and operation sequences",
+      "D-GUARD": "Explicit constraints against common failure modes and error patterns"
+    },
+    "total_memories_analyzed": 223,
+    "task_distribution": {
+      "pick_and_place": {
+        "success": 41,
+        "failure": 35
+      },
+      "look_at_obj_in_light": {
+        "success": 12,
+        "failure": 9
+      },
+      "clean": {
+        "success": 17,
+        "failure": 19
+      },
+      "heat": {
+        "success": 14,
+        "failure": 18
+      },
+      "cool": {
+        "success": 19,
+        "failure": 16
+      },
+      "examine": {
+        "success": 10,
+        "failure": 13
+      }
+    }
+  }
+}

@@ -1,0 +1,51 @@
+#!/bin/bash
+# ============================================================
+# SkillRL 用户配置文件
+# 使用方法：
+#   cp config.sh.example config.sh
+#   编辑 config.sh 填写你自己的路径
+#   config.sh 已加入 .gitignore，不会被提交
+# ============================================================
+
+# 你在集群上的用户根目录
+export SKILLRL_USER_BASE=
+# SkillRL 代码目录（通常就是本仓库根目录）
+export SKILLRL_ROOT=${SKILLRL_USER_BASE}/research/skillrl
+
+# 预训练模型路径
+export SKILLRL_MODEL_PATH=${SKILLRL_USER_BASE}/models/Qwen2.5-1.5B-Instruct
+
+# 数据集根目录
+export SKILLRL_DATA_BASE=${SKILLRL_USER_BASE}/dataset/data
+
+# ALFWorld 游戏数据目录
+export SKILLRL_ALFWORLD_DATA=${SKILLRL_DATA_BASE}/alfworld/game_data
+
+# verl-agent parquet 数据目录
+export SKILLRL_VERL_DATA=${SKILLRL_DATA_BASE}/verl-agent/text
+
+# 实验输出根目录（checkpoint / tensorboard）
+export SKILLRL_EXP_BASE=${SKILLRL_USER_BASE}/experiments
+
+# GPU 持续计算脚本路径（防止低利用率被 kill，留空则跳过）
+export SKILLRL_GPU_KEEPER_SCRIPT=
+
+# LLM 后端配置（skill 进化调用）
+# SKILLRL_LLM_BACKEND: catpaw（Anthropic Messages API）或 aigc（OpenAI 兼容网关）
+export SKILLRL_LLM_BACKEND=catpaw
+# SKILLRL_LLM_MODEL: 与 backend 对应的模型名称
+#   catpaw 可用: claude-sonnet-4-6, claude-opus-4-7
+#   aigc   可用: MiniMax-M2.7, gemini-3.1-pro-preview
+export SKILLRL_LLM_MODEL=claude-sonnet-4-6
+
+# LLM API 接入地址（必须填写，catpaw 和 aigc 各自的 base URL）
+export SKILLRL_CATPAW_BASE_URL=https://YOUR_LLM_BASE_URL
+export SKILLRL_AIGC_BASE_URL=https://YOUR_AIGC_BASE_URL
+
+# MIS 账号（catpaw 认证用）
+export SKILLRL_MIS_ID=YOUR_MIS_ID
+
+# AIGC 网关 AppId（仅 SKILLRL_LLM_BACKEND=aigc 时生效）
+export SKILLRL_AIGC_APP_ID_MINIMAX=YOUR_AIGC_APP_ID_MINIMAX
+export SKILLRL_AIGC_APP_ID_GEMINI=YOUR_AIGC_APP_ID_GEMINI
+
