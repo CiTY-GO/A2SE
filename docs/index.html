@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A2SE：面向 LLM Agent 强化学习的能力对齐技能演化框架。">
+  <title>A²SE | Ability-Aligned Skill Evolution</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+
+  <header class="site-header">
+    <a class="brand" href="#top" aria-label="返回顶部">
+      <span class="brand-mark">A²</span><span>SE</span>
+    </a>
+    <nav class="site-nav" aria-label="主导航">
+      <a href="#motivation">动机</a>
+      <a href="#method">方法</a>
+      <a href="#results">结果</a>
+      <a href="#evidence">证据</a>
+      <a href="#code">代码</a>
+    </nav>
+    <a class="header-link" href="https://github.com/CiTY-GO/A2SE" target="_blank" rel="noreferrer">GitHub</a>
+  </header>
+
+  <main id="main">
+    <section class="hero" id="top" aria-labelledby="hero-title">
+      <div class="hero-inner">
+        <div class="eyebrow">EMNLP 2026 · Agentic Reinforcement Learning</div>
+        <h1 id="hero-title">A²SE</h1>
+        <p class="hero-subtitle">Ability-Aligned Skill Evolution for LLM Agents via Reinforcement Learning</p>
+        <p class="hero-lede">
+          让技能库不再盲目增长，而是随着 Agent 的能力阶段，更新它此刻真正缺少的知识；
+          让强化学习不再过早惩罚尚未学会使用技能的轨迹。
+        </p>
+        <div class="hero-actions">
+          <a class="primary-action" href="#method">理解方法</a>
+          <a class="secondary-action" href="assets/a2se-paper.pdf" target="_blank">阅读论文</a>
+        </div>
+        <div class="hero-metrics" aria-label="主要结果">
+          <div><strong>88.3%</strong><span>ALFWorld 成功率</span></div>
+          <div><strong>79.7%</strong><span>WebShop 成功率</span></div>
+          <div><strong>Pure RL</strong><span>Qwen2.5-7B，无冷启动 SFT</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-band motivation" id="motivation">
+      <div class="section-inner">
+        <div class="section-kicker">01 · Motivation</div>
+        <h2>技能增强 RL，卡在两种“错位”上</h2>
+        <p class="section-intro">
+          外部 Skill Bank 能减少长程探索成本，但已有方法往往把技能当作整段文本更新，也默认策略一开始就会使用这些技能。
+          A²SE 的出发点是：技能内容和优化信号都必须与 Agent 当前能力对齐。
+        </p>
+
+        <div class="misalignment-list">
+          <article class="misalignment-item">
+            <div class="issue-index">01</div>
+            <div class="issue-copy">
+              <h3>能力错位 · Competence Misalignment</h3>
+              <p>失败会随训练阶段迁移：早期常见规划与探索错误，中期转向状态丢失和动作序列，后期集中在细粒度约束。</p>
+            </div>
+            <div class="issue-flow" aria-label="传统技能更新的问题">
+              <span>复合失败</span><b>→</b><span>整段技能重写</span><b>→</b><span class="danger">无法定位瓶颈</span>
+            </div>
+          </article>
+
+          <article class="misalignment-item">
+            <div class="issue-index">02</div>
+            <div class="issue-copy">
+              <h3>优化错位 · Optimization Misalignment</h3>
+              <p>训练早期 Skill Group 往往弱于 Base Group。GRPO 的组内相对优势会把技能轨迹判成“更差”，反而训练模型忽略技能提示。</p>
+            </div>
+            <div class="issue-flow" aria-label="早期负向优化循环">
+              <span>不会用技能</span><b>→</b><span>低 Advantage</span><b>→</b><span class="danger">更少遵循技能</span>
+            </div>
+          </article>
+        </div>
+
+        <aside class="thesis-callout">
+          <span>Rebuttal clarified</span>
+          <p><strong>四维技能不是事后分类法。</strong>它是训练期的操作接口：只有先把技能拆到能力维度，系统才能进行维度级归因、定向更新和选择性验证。</p>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section-band method" id="method">
+      <div class="section-inner">
+        <div class="section-kicker">02 · Method</div>
+        <h2>一个围绕能力瓶颈闭环运转的 Skill Bank</h2>
+        <p class="section-intro">
+          A²SE 将同一批任务的 Rollout 等分为 Skill Group 与 Base Group：一半注入检索技能，一半不注入。
+          两组表现既用于估计能力，也用于修正早期奖励偏差。
+        </p>
+
+        <figure class="paper-figure">
+          <img src="assets/a2se-overview.png" alt="A2SE 框架总览：Rollout 分组、四维技能表示、阶段聚焦和因果验证">
+          <figcaption>论文框架总览：A/B Rollout、四维技能表示、阶段感知更新与因果验证共同组成训练闭环。</figcaption>
+        </figure>
+
+        <div class="method-rail" aria-label="A2SE 方法四个环节">
+          <div><span>1</span><strong>表示</strong><small>技能拆为四维</small></div>
+          <div><span>2</span><strong>聚焦</strong><small>定位当前瓶颈</small></div>
+          <div><span>3</span><strong>验证</strong><small>同初始状态重放</small></div>
+          <div><span>4</span><strong>优化</strong><small>CASR 修正早期偏差</small></div>
+        </div>
+
+        <section class="dimension-lab" aria-labelledby="dimension-title">
+          <div class="lab-heading">
+            <div>
+              <div class="mini-kicker">Four-dimensional skills</div>
+              <h3 id="dimension-title">技能不是一个黑盒段落</h3>
+            </div>
+            <div class="dimension-tabs" role="tablist" aria-label="技能维度">
+              <button class="dimension-tab is-active" type="button" role="tab" aria-selected="true" data-dim="plan">D-PLAN</button>
+              <button class="dimension-tab" type="button" role="tab" aria-selected="false" data-dim="track">D-TRACK</button>
+              <button class="dimension-tab" type="button" role="tab" aria-selected="false" data-dim="exec">D-EXEC</button>
+              <button class="dimension-tab" type="button" role="tab" aria-selected="false" data-dim="guard">D-GUARD</button>
+            </div>
+          </div>
+          <div class="dimension-detail" aria-live="polite">
+            <div class="dimension-symbol" id="dimension-symbol">PLAN</div>
+            <div>
+              <h4 id="dimension-name">规划与探索</h4>
+              <p id="dimension-description">负责目标分解、搜索顺序和子目标调度，解决 Agent 不知道先做什么、去哪里找的问题。</p>
+              <div class="skill-example">
+                <span>技能示例</span>
+                <p id="dimension-example">先枚举候选位置，按空间顺序逐一搜索；已确认为空的位置不重复访问。</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="stage-lab" aria-labelledby="stage-title">
+          <div class="stage-copy">
+            <div class="mini-kicker">Stage-aware focus</div>
+            <h3 id="stage-title">拖动能力值，看更新焦点如何迁移</h3>
+            <p>能力值由 Skill/Base 两组成功率的 EMA 平滑组合得到。阈值不是用来给模型贴标签，而是控制本轮教师模型允许更新哪些技能维度。</p>
+            <label for="ability-slider">Agent ability A(t): <strong id="ability-value">0.32</strong></label>
+            <input id="ability-slider" type="range" min="0" max="100" value="32" aria-describedby="stage-explanation">
+            <div class="stage-scale" aria-hidden="true"><span>0</span><span>0.50</span><span>0.75</span><span>1.0</span></div>
+          </div>
+          <div class="stage-output">
+            <div class="stage-label" id="stage-label">Stage I · 基础探索</div>
+            <div class="focus-dims" id="focus-dims">
+              <span class="focus-chip active" data-focus="plan">D-PLAN</span>
+              <span class="focus-chip" data-focus="track">D-TRACK</span>
+              <span class="focus-chip" data-focus="exec">D-EXEC</span>
+              <span class="focus-chip" data-focus="guard">D-GUARD</span>
+            </div>
+            <p id="stage-explanation">成功率仍低，失败多来自目标分解和探索不足。本阶段优先更新 D-PLAN。</p>
+          </div>
+        </section>
+
+        <div class="method-details">
+          <article>
+            <div class="detail-number">03</div>
+            <h3>因果验证：先证明更新有用，再写回 Skill Bank</h3>
+            <p>每次演化前保存快照；更新后固定策略参数，在相同任务初始状态上重新 Rollout。若某任务类型成功率下降超过容忍阈值，仅回滚该类型对应的更新。</p>
+            <div class="verify-flow">
+              <span>Skill snapshot</span><b>→</b><span>定向更新</span><b>→</b><span>同状态重放</span><b>→</b><span>Accept / Rollback</span>
+            </div>
+          </article>
+          <article>
+            <div class="detail-number">04</div>
+            <h3>CASR：只在模型尚不会用技能时扶一把</h3>
+            <p>CASR 根据 Skill Group 与 Base Group 的差距动态调整补偿：放大少量成功技能轨迹，减轻早期失败惩罚；当技能组稳定领先后，补偿自然衰减，恢复标准 GRPO。</p>
+            <div class="formula"><span>Δ</span><sub>m</sub> = SR<sub>skill</sub> − SR<sub>base</sub></div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-band results" id="results">
+      <div class="section-inner">
+        <div class="section-kicker">03 · Results</div>
+        <h2>提升来自完整闭环，而不是单一技巧</h2>
+        <p class="section-intro">
+          主实验采用 Qwen2.5-7B-Instruct，在没有冷启动 SFT 的条件下直接进行 RL。
+          下图展示同一骨干模型下的成功率；WebShop 另取得 91.2 的任务得分。
+        </p>
+
+        <div class="chart-toolbar" role="group" aria-label="选择基准">
+          <button class="chart-toggle is-active" type="button" data-benchmark="alfworld" aria-pressed="true">ALFWorld</button>
+          <button class="chart-toggle" type="button" data-benchmark="webshop" aria-pressed="false">WebShop</button>
+        </div>
+        <div class="result-chart" id="result-chart" aria-live="polite"></div>
+        <div class="result-note" id="result-note">
+          A²SE 达到 88.3%，较最强技能增强基线 SkillRL 提升 11.0 pp，较标准 GRPO 提升 13.3 pp。
+        </div>
+
+        <div class="result-highlights">
+          <article><strong>+11.0 pp</strong><span>ALFWorld 相对 SkillRL</span></article>
+          <article><strong>+7.1 pp</strong><span>WebShop 相对最强列示基线 GRPO</span></article>
+          <article><strong>34%</strong><span>WebShop 任务类型更新被验证回滚</span></article>
+        </div>
+
+        <section class="ablation-section" aria-labelledby="ablation-title">
+          <div class="ablation-heading">
+            <div>
+              <div class="mini-kicker">Ablation study</div>
+              <h3 id="ablation-title">移除任一环节，性能都会下降</h3>
+            </div>
+            <div class="chart-toolbar compact" role="group" aria-label="选择消融实验基准">
+              <button class="ablation-toggle is-active" type="button" data-benchmark="alfworld" aria-pressed="true">ALFWorld</button>
+              <button class="ablation-toggle" type="button" data-benchmark="webshop" aria-pressed="false">WebShop</button>
+            </div>
+          </div>
+          <div class="ablation-chart" id="ablation-chart" aria-live="polite"></div>
+        </section>
+      </div>
+    </section>
+
+    <section class="section-band evidence" id="evidence">
+      <div class="section-inner">
+        <div class="section-kicker">04 · Rebuttal Evidence</div>
+        <h2>审稿人追问后，贡献边界更清楚了</h2>
+        <div class="evidence-grid">
+          <article>
+            <span class="evidence-tag">不是 taxonomy</span>
+            <strong>四维表示是可执行接口</strong>
+            <p>换回 flat skills 后，ALFWorld 从 88.3 降至 79.7，WebShop 从 79.7 降至 68.8。没有维度接口，归因、定向更新和验证都无法精确进行。</p>
+          </article>
+          <article>
+            <span class="evidence-tag">不是盲信 teacher</span>
+            <strong>34% 更新确实有害</strong>
+            <p>WebShop 中约 34% 的任务类型更新被回滚；移除因果验证后成功率降至 62.5，说明“听起来合理”的技能也可能污染策略。</p>
+          </article>
+          <article>
+            <span class="evidence-tag">不是永久奖励 bonus</span>
+            <strong>CASR 会随技能成熟退出</strong>
+            <p>补偿由 Skill/Base 差距驱动；技能组追上后系数衰减。移除 CASR 后，两个基准均下降 3.9 pp。</p>
+          </article>
+        </div>
+
+        <div class="case-study">
+          <div class="case-heading">
+            <div class="mini-kicker">Rollback case</div>
+            <h3>为什么“更具体”的技能反而可能更差？</h3>
+          </div>
+          <div class="case-compare">
+            <div>
+              <span class="case-state good">保留的更新</span>
+              <h4>明确 go-to-before-put</h4>
+              <p>为通用搬运技能补充执行前置条件，并增加 “Nothing happens” 后重新导航的恢复规则。它补齐了真实执行缺口。</p>
+            </div>
+            <div>
+              <span class="case-state bad">被回滚的更新</span>
+              <h4>把 cup / mug 写成硬规则</h4>
+              <p>教师模型要求遇到近似物体就直接忽略并继续搜索，反而与已有检查规则冲突，使 Heat 任务成功率下降 0.25，最终被回滚。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="scope-note">
+          <strong>已明确的边界</strong>
+          <p>A²SE 的额外成本来自周期性教师模型调用与验证，而不是每次策略更新；当前验证评估一次演化步骤的净效应，不穷举所有技能子集组合。对于缺少基础网页导航能力的小模型，WebShop 仍可能需要 SFT warm start。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-band code" id="code">
+      <div class="section-inner">
+        <div class="section-kicker">05 · From Paper to Code</div>
+        <h2>论文组件在仓库中的位置</h2>
+        <div class="code-map">
+          <a href="https://github.com/CiTY-GO/A2SE/tree/main/agent_system/multi_turn_rollout" target="_blank" rel="noreferrer"><span>Rollout</span><strong>多轮 Agent-Environment 交互</strong><code>agent_system/multi_turn_rollout/</code></a>
+          <a href="https://github.com/CiTY-GO/A2SE/blob/main/agent_system/memory/skills_only_memory.py" target="_blank" rel="noreferrer"><span>Skill Bank</span><strong>四维技能存储、检索与合成</strong><code>skills_only_memory.py</code></a>
+          <a href="https://github.com/CiTY-GO/A2SE/blob/main/agent_system/memory/skill_updater.py" target="_blank" rel="noreferrer"><span>Evolution</span><strong>失败归因与维度级更新</strong><code>skill_updater.py</code></a>
+          <a href="https://github.com/CiTY-GO/A2SE/blob/main/verl/trainer/ppo/ray_trainer.py" target="_blank" rel="noreferrer"><span>Training</span><strong>调度、验证、回滚与 CASR</strong><code>ray_trainer.py</code></a>
+        </div>
+        <div class="final-links">
+          <a class="primary-action" href="https://github.com/CiTY-GO/A2SE" target="_blank" rel="noreferrer">查看完整代码</a>
+          <a class="secondary-action" href="assets/a2se-paper.pdf" target="_blank">下载论文 PDF</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div><strong>A²SE</strong><span>Ability-Aligned Skill Evolution</span></div>
+    <p>Fei Huang*, Tianyu Chen*, Zhongyu He, Yuanfan Li, Meng Hsuan Yu, Xingyang Li, Lu Pan, Ke Zeng, Xunliang Cai</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

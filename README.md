@@ -6,9 +6,16 @@
 
 <p align="center">
   <a href="#main-results"><img src="https://img.shields.io/badge/EMNLP-2026-8A2BE2" alt="EMNLP 2026"></a>
+  <a href="https://city-go.github.io/A2SE/"><img src="https://img.shields.io/badge/Project-Website-E86534" alt="A2SE Project Website"></a>
   <a href="https://github.com/volcengine/verl"><img src="https://img.shields.io/badge/Built%20on-veRL-EF6C00" alt="Built on veRL"></a>
   <img src="https://img.shields.io/badge/Python-%3E%3D3.8-3776AB" alt="Python >= 3.8">
   <img src="https://img.shields.io/badge/Benchmarks-ALFWorld%20%7C%20WebShop-2E8B57" alt="ALFWorld and WebShop">
+</p>
+
+<p align="center">
+  <a href="https://city-go.github.io/A2SE/"><strong>Project Website</strong></a>
+  &nbsp;|&nbsp;
+  <a href="https://city-go.github.io/A2SE/assets/a2se-paper.pdf"><strong>Paper</strong></a>
 </p>
 
 <p align="center">
