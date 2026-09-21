@@ -19,7 +19,7 @@
       <a href="#motivation">动机</a>
       <a href="#method">方法</a>
       <a href="#results">结果</a>
-      <a href="#evidence">证据</a>
+      <a href="#evidence">机制验证</a>
       <a href="#code">代码</a>
     </nav>
     <a class="header-link" href="https://github.com/CiTY-GO/A2SE" target="_blank" rel="noreferrer">GitHub</a>
@@ -81,8 +81,8 @@
         </div>
 
         <aside class="thesis-callout">
-          <span>Rebuttal clarified</span>
-          <p><strong>四维技能不是事后分类法。</strong>它是训练期的操作接口：只有先把技能拆到能力维度，系统才能进行维度级归因、定向更新和选择性验证。</p>
+          <span>Core design</span>
+          <p><strong>四维技能是训练期的操作接口。</strong>将技能拆到能力维度后，系统才能对失败进行细粒度归因，并据此完成阶段聚焦、定向更新和因果验证。</p>
         </aside>
       </div>
     </section>
@@ -216,30 +216,39 @@
 
     <section class="section-band evidence" id="evidence">
       <div class="section-inner">
-        <div class="section-kicker">04 · Rebuttal Evidence</div>
-        <h2>审稿人追问后，贡献边界更清楚了</h2>
+        <div class="section-kicker">04 · Mechanism Validation</div>
+        <h2>消融实验解释每个组件为何必要</h2>
+        <p class="section-intro">
+          A²SE 的性能来自一条完整链路：四维表示负责定位失败，阶段感知机制聚焦当前能力瓶颈，
+          因果验证过滤有害更新，CASR 则修正训练早期的优化偏差。
+        </p>
         <div class="evidence-grid">
           <article>
-            <span class="evidence-tag">不是 taxonomy</span>
-            <strong>四维表示是可执行接口</strong>
-            <p>换回 flat skills 后，ALFWorld 从 88.3 降至 79.7，WebShop 从 79.7 降至 68.8。没有维度接口，归因、定向更新和验证都无法精确进行。</p>
+            <span class="evidence-tag">结构化表示</span>
+            <strong>四维技能支撑精确归因</strong>
+            <p>将四维技能退化为 flat skills 后，ALFWorld 从 88.3% 降至 79.7%，WebShop 从 79.7% 降至 68.8%。结构化表示使系统能够定位具体能力缺口，而不是整体重写技能。</p>
           </article>
           <article>
-            <span class="evidence-tag">不是盲信 teacher</span>
-            <strong>34% 更新确实有害</strong>
-            <p>WebShop 中约 34% 的任务类型更新被回滚；移除因果验证后成功率降至 62.5，说明“听起来合理”的技能也可能污染策略。</p>
+            <span class="evidence-tag">阶段感知</span>
+            <strong>更新目标随能力阶段迁移</strong>
+            <p>移除阶段感知聚焦后，ALFWorld 降至 82.0%，WebShop 降至 72.7%。训练早期优先补足规划能力，随后逐步转向状态追踪、动作执行与错误防护。</p>
           </article>
           <article>
-            <span class="evidence-tag">不是永久奖励 bonus</span>
-            <strong>CASR 会随技能成熟退出</strong>
-            <p>补偿由 Skill/Base 差距驱动；技能组追上后系数衰减。移除 CASR 后，两个基准均下降 3.9 pp。</p>
+            <span class="evidence-tag">因果验证</span>
+            <strong>有害更新必须被识别并回滚</strong>
+            <p>WebShop 中约 34% 的任务类型更新未通过验证并被回滚；移除因果验证后，ALFWorld 降至 81.3%，WebShop 降至 62.5%。</p>
+          </article>
+          <article>
+            <span class="evidence-tag">奖励对齐</span>
+            <strong>CASR 缓解早期负向优化</strong>
+            <p>CASR 根据 Skill Group 与 Base Group 的能力差距动态补偿；当模型逐渐掌握技能后，补偿自动衰减。移除 CASR 后，两个基准均下降 3.9 pp。</p>
           </article>
         </div>
 
         <div class="case-study">
           <div class="case-heading">
-            <div class="mini-kicker">Rollback case</div>
-            <h3>为什么“更具体”的技能反而可能更差？</h3>
+            <div class="mini-kicker">Update verification</div>
+            <h3>一次技能更新如何被保留或回滚</h3>
           </div>
           <div class="case-compare">
             <div>
@@ -256,8 +265,8 @@
         </div>
 
         <div class="scope-note">
-          <strong>已明确的边界</strong>
-          <p>A²SE 的额外成本来自周期性教师模型调用与验证，而不是每次策略更新；当前验证评估一次演化步骤的净效应，不穷举所有技能子集组合。对于缺少基础网页导航能力的小模型，WebShop 仍可能需要 SFT warm start。</p>
+          <strong>适用范围与成本</strong>
+          <p>A²SE 需要教师模型完成技能蒸馏与周期性演化，因此仍受教师能力上限和调用成本影响。当前实验集中在文本交互环境；向多模态 Agent 扩展时，还需要同时处理视觉、听觉与动作技能的表示和验证。</p>
         </div>
       </div>
     </section>
