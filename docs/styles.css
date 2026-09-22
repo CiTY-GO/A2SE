@@ -122,7 +122,7 @@ button {
   inset: 94px -3vw 2.5rem auto;
   width: 58vw;
   content: "";
-  background: url("assets/a2se-overview.png") center / contain no-repeat;
+  background: url("assets/a2se-pipeline.png") center / contain no-repeat;
 }
 
 .hero-inner {
