@@ -119,10 +119,10 @@ button {
 
 .hero::before {
   position: absolute;
-  inset: 94px -3vw 2.5rem auto;
-  width: 58vw;
+  inset: 94px 1vw 2.5rem auto;
+  width: 51vw;
   content: "";
-  background: url("assets/a2se-pipeline.png") center / contain no-repeat;
+  background: url("assets/a2se-intro-overview.png") center / contain no-repeat;
 }
 
 .hero-inner {
